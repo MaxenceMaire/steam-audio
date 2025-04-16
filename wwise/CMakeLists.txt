@@ -70,6 +70,103 @@ option(STEAMAUDIOWWISE_BUILD_DOCS "Build documentation." OFF)
 
 
 # ---------------------------------------------------------------------------------------------------------------------
+# COMPILER FLAGS
+# ---------------------------------------------------------------------------------------------------------------------
+
+# Flags determined by system introspection
+if (IPL_OS_WINDOWS)
+    add_definitions(-DIPL_OS_WINDOWS)
+endif()
+if (IPL_OS_LINUX)
+    add_definitions(-DIPL_OS_LINUX)
+endif()
+if (IPL_OS_MACOS)
+    add_definitions(-DIPL_OS_MACOSX)
+endif()
+if (IPL_OS_ANDROID)
+    add_definitions(-DIPL_OS_ANDROID)
+endif()
+if (IPL_OS_IOS)
+    add_definitions(-DIPL_OS_IOS)
+endif()
+if (IPL_OS_WASM)
+    add_definitions(-DIPL_OS_WASM)
+endif()
+
+if (IPL_CPU_X86)
+    add_definitions(-DIPL_CPU_X86)
+endif()
+if (IPL_CPU_X64)
+    add_definitions(-DIPL_CPU_X64)
+endif()
+if (IPL_CPU_ARMV7)
+    add_definitions(-DIPL_CPU_ARMV7)
+endif()
+if (IPL_CPU_ARMV8)
+    add_definitions(-DIPL_CPU_ARM64)
+endif()
+
+# Windows flags
+if (IPL_OS_WINDOWS)
+    add_compile_definitions(
+        WIN32
+        WINDOWS
+        UNICODE
+        _UNICODE
+        _CRT_SECURE_NO_WARNINGS
+        WIN32_LEAN_AND_MEAN
+        NOMINMAX
+        _DISABLE_EXTENDED_ALIGNED_STORAGE
+        $<IF:$<CONFIG:Debug>,_DEBUG,NDEBUG>
+    )
+    add_compile_options(
+        /EHsc /MP /W3 /Zi
+        $<IF:$<CONFIG:Debug>,/MTd,/MT>
+        $<$<CONFIG:Debug>:/RTC1>
+        $<$<NOT:$<CONFIG:Debug>>:/Ox>
+        $<$<CONFIG:Release>:/GL>
+    )
+    add_link_options(
+        /DEBUG
+        $<$<CONFIG:Release>:/OPT:REF>
+        $<$<CONFIG:Release>:/OPT:ICF>
+        $<$<CONFIG:Release>:/LTCG>
+        $<$<CONFIG:Release>:/MANIFEST:NO>
+        $<IF:$<CONFIG:Release>,/INCREMENTAL:NO,/INCREMENTAL>
+    )
+endif()
+
+# Linux flags
+if (IPL_OS_LINUX)
+    add_compile_options(-fPIC -g -Wl,--no-undefined)
+    if (IPL_CPU_X86)
+        add_compile_options(-m32 -mfpmath=sse -march=native)
+    endif()
+endif()
+
+# macOS flags
+if (IPL_OS_MACOS)
+    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13")
+endif()
+
+# Android flags
+if (IPL_OS_ANDROID)
+    add_compile_options(-fPIC -g $<$<CONFIG:Release>:-O3>)
+    add_link_options(-static-libstdc++)
+endif()
+
+# iOS flags
+# todo
+
+# WASM flags
+if (IPL_OS_WASM)
+    add_compile_options(-msimd128 -mfpu=neon)
+    add_link_options(-sALLOW_MEMORY_GROWTH=1 -sSINGLE_FILE=1)
+endif()
+
+
+# ---------------------------------------------------------------------------------------------------------------------
 # TARGETS
 # ---------------------------------------------------------------------------------------------------------------------
 
